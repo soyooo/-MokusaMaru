@@ -1,3 +1,4 @@
+//モクサマルmainNode
 #include "mbed.h"
 #include "MD2pin.h"
 #include "imu.h"
