@@ -71,12 +71,6 @@ int main()
 
     while(1)
     {
-        ctrlr cmd;
-        cmd.LX = propo.getStickVal(0);
-        cmd.LY = propo.getStickVal(1);
-        cmd.RX = propo.getStickVal(2);
-        cmd.RY = propo.getStickVal(3);
-
         float robot_velocity[3] = {cmd.LX, cmd.LY, cmd.RX};
 
         if(robot_velocity[2] == 0)
