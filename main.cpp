@@ -1,7 +1,7 @@
 #include "mbed.h"
-#include "MD2pin.h"
+#include "MDD.h"
 #include "imu.h"
-#include "rotEnc.h"
+#include "rotaryEncoder.h"
 #include "CSVP.h"
 #include "SBUS.h"
 #include "robotPosure.h"
@@ -35,19 +35,19 @@ robotPosure robot(jacobian, 0.95);
 IMU imu(0.005, p9, p10);
 
 //MD用の信号ピン設定
-MD2pin Motor[5] = { MD2pin(p22, p21),
-                    MD2pin(p23, p29),
-                    MD2pin(p24, p30),
-                    MD2pin(p25, p19),
-                    MD2pin(p26, p20)
+MDD Motor[5] = { MDD(p22, p21),
+                    MDD(p23, p29),
+                    MDD(p24, p30),
+                    MDD(p25, p19),
+                    MDD(p26, p20)
                     };
 
 //エンコーダーピン設定
-Enc enc[5] = {  Enc(p5,p6),
-                Enc(p18,p17),
-                Enc(p16,p15),
-                Enc(p12,p11),
-                Enc(p8,p7)
+rotaryEncoder enc[5] = {  rotaryEncoder(p5,p6),
+                rotaryEncoder(p18,p17),
+                rotaryEncoder(p16,p15),
+                rotaryEncoder(p12,p11),
+                rotaryEncoder(p8,p7)
             };
 
 typedef struct controller
