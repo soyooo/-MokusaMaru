@@ -10,23 +10,24 @@ class IMU
 {
 public:
     IMU(float t, PinName sla = p9, PinName sld = p10);
-    void updataValue();
-    void doOffset();
-    void startComputingAngle();    
-    void stopComputingAngle();
-        
-    float angle[3];
-    float preAngle[3];
-    float angleAcc[3];       
-    float acc[3];
-    float gyro[3];
-    float mag[3];
-    
+
+    void performCalibration();
+    void startAngleComputing();
+    void stopAngleComputing();
+
+    float angle[3]; //角度[roll,pitch,yow]　[deg]
+    float pre_angle[3]; //前回角度[roll,pitch,yow]　[deg]
+    float angle_acc[3]; //加速度センサーのみで計算された角度[roll,pitch,yow]　[deg]
+    float acc[3]; //加速度[x,y,z] [m/^2]
+    float gyro[3];//角速度[roll,pitch,yow] [deg/sec]
+    float mag[3]; //磁束密度?[x,y,z]  [??]
+
 private:
-    void _computeAngle();
     I2C i2c;
     mpu9250 imu;
     Ticker angleTimer;
     float delta_t;
+    void _updataImuValue();
+    void _computeAngle();
 };
 #endif

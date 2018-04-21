@@ -1,50 +1,50 @@
 #include "mbed.h"
-#include "rotaryEncoder.h"
+#include "RotaryEncoder.h"
 
-rotaryEncoder::rotaryEncoder(PinName a, PinName b, int count_per_rotation) : encA(a), encB(b)
+RotaryEncoder::RotaryEncoder(PinName a, PinName b, int count_per_rotation) : pinA(a), pinB(b)
 {
     count = 0;
     count_per_interrupt = 1.0 / count_per_rotation;
-    encA.rise(this, &rotaryEncoder::_aRaise);
-    encA.fall(this, &rotaryEncoder::_aFall);
-    encB.rise(this, &rotaryEncoder::_bRaise);
-    encB.fall(this, &rotaryEncoder::_bFall);
+    pinA.rise(this, &RotaryEncoder::_aRaise);
+    pinA.fall(this, &RotaryEncoder::_aFall);
+    pinB.rise(this, &RotaryEncoder::_bRaise);
+    pinB.fall(this, &RotaryEncoder::_bFall);
 }
 
-void rotaryEncoder::changeDirection()
+void RotaryEncoder::changeDirection()
 {
     count_per_interrupt *= -1;
 }
 
-void rotaryEncoder::defineNowCount(float n)
+void RotaryEncoder::defineNowCount(float n)
 {
     count = n;
 }
 
-void rotaryEncoder::_aRaise()
+void RotaryEncoder::_aRaise()
 {
-    if(!encB)
+    if(!pinB)
         count += count_per_interrupt;
     else count -= count_per_interrupt;
 }
 
-void rotaryEncoder::_aFall()
+void RotaryEncoder::_aFall()
 {
-    if(encB)
+    if(pinB)
         count += count_per_interrupt;
     else count -= count_per_interrupt;
 }
 
-void rotaryEncoder::_bRaise()
+void RotaryEncoder::_bRaise()
 {
-    if(encA)
+    if(pinA)
         count += count_per_interrupt;
     else count -= count_per_interrupt;
 }
 
-void rotaryEncoder::_bFall()
+void RotaryEncoder::_bFall()
 {
-    if(!encA)
+    if(!pinA)
         count += count_per_interrupt;
     else count -= count_per_interrupt;
 }

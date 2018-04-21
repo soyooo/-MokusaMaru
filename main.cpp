@@ -1,10 +1,10 @@
 #include "mbed.h"
 #include "MDD.h"
 #include "imu.h"
-#include "rotaryEncoder.h"
-#include "CSVP.h"
+#include "RotaryEncoder.h"
+#include "CSV.h"
 #include "SBUS.h"
-#include "robotPosure.h"
+#include "RobotPosure.h"
 #include "PID.h"
 
 //オンボードLEDの使用宣言
@@ -16,9 +16,6 @@ DigitalOut LED[] = {DigitalOut(LED1),
 Serial pc(USBTX, USBRX);
 Serial XBEE(p28, p27);
 
-//csv形式で通信する
-CSVP xbee(p28, p27);
-
 //propo reciever とSBUSで通信する
 SBUS propo(p13, p14);
 
@@ -29,13 +26,13 @@ float jacobian[4][3] ={{0.5,  0.866, -1},
                        {  0,      0,  0}};
 
 //ロボットの移動に関する計算をするやつ
-robotPosure robot(jacobian, 0.95);
+RobotPosure robot(jacobian, 0.95);
 
 //IMUと通信計算するやつ
 IMU imu(0.005, p9, p10);
 
 //MD用の信号ピン設定
-MDD Motor[5] = { MDD(p22, p21),
+  MDD Motor[5] = {  MDD(p22, p21),
                     MDD(p23, p29),
                     MDD(p24, p30),
                     MDD(p25, p19),
@@ -43,12 +40,12 @@ MDD Motor[5] = { MDD(p22, p21),
                     };
 
 //エンコーダーピン設定
-rotaryEncoder enc[5] = {  rotaryEncoder(p5,p6),
-                rotaryEncoder(p18,p17),
-                rotaryEncoder(p16,p15),
-                rotaryEncoder(p12,p11),
-                rotaryEncoder(p8,p7)
-            };
+RotaryEncoder enc[5] = {  RotaryEncoder(p5,p6),
+                          RotaryEncoder(p18,p17),
+                          RotaryEncoder(p16,p15),
+                          RotaryEncoder(p12,p11),
+                          RotaryEncoder(p8,p7)
+                        };
 
 typedef struct controller
 {
@@ -59,19 +56,18 @@ typedef struct controller
 int main()
 {
     //yow角補正用のPID計算するやつ
-    PID pidYow(0.01, 0, 0, 0.01, 0.95);
+    PID pidRobotYow(0.01, 0, 0, 0.01, 0.95);
 
     //タイマー３の優先度を最低にする
     NVIC_SetPriority(TIMER3_IRQn, 100);
 
     //IMUのキャリブレーション
-    imu.doOffset();
-    imu.startComputingAngle();
+    imu.performCalibration();
+    imu.startAngleComputing();
 
-    robot.imuYow = &imu.angle[2];
-    pidYow.sensor = &imu.angle[2];
-    pidYow.target = &robot.targetPosure[2];
-    pidYow.start();
+    robot.imu_yow = &imu.angle[2];
+    pidRobotYow.sensor = &imu.angle[2];
+    pidRobotYow.start();
 
     while(1)
     {
@@ -81,22 +77,19 @@ int main()
         cmd.RX = propo.getStickVal(2);
         cmd.RY = propo.getStickVal(3);
 
-        float velocity[3] = {cmd.LX, cmd.LY, cmd.RX};
+        float robot_velocity[3] = {cmd.LX, cmd.LY, cmd.RX};
 
-        if(velocity[2] == 0)
-            velocity[2] = pidYow.output;
-        else *pidYow.target= *pidYow.sensor;
+        if(robot_velocity[2] == 0)
+            robot_velocity[2] = pidRobotYow.output;
+        else *pidRobotYow.target= *pidRobotYow.sensor;
 
-        robot.setVelocityL(velocity);
-        robot.computeWheelVelocity();
-        robot.rescaleWheelVelocity();
-
-        pc.printf("%.3f  ", imu.angle[2]);
+        robot.setVelL(robot_velocity);
+        robot.computeWheelVel();
+        robot.rescaleWheelVel();
 
         for(int i = 0; i < 3; i++)
-            Motor[i].drive(robot.wheelVelocity[i]);
+            Motor[i].drive(robot.wheel_vel[i]);
 
-        pc.printf("\n");
-        wait(0.02);
+        wait(0.002);
     }
 }

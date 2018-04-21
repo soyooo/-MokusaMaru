@@ -3,6 +3,8 @@
 
 #include "mbed.h"
 
+//PID計算機
+/**/
 class PID
 {
 public:
@@ -10,10 +12,12 @@ public:
     void start();
     void stop();
     void reset();
-    float output;
-    float abs_max_output;
-    float *sensor, *target;
-    
+
+    float output; //計算された出力値が入る　
+
+    float abs_max_output; //outputの100%を定義
+    float *sensor, *target; //センサーと目標値を示す変数のポインタ 外側から引っ張ってくる
+
 private:
     Ticker pidTimer;
     float kp, ki, kd, delta_t;

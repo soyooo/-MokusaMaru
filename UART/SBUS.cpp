@@ -5,7 +5,7 @@ SBUS::SBUS(PinName TX, PinName RX) : myserial(TX, RX)
 {
     myserial.baud(100000);
     myserial.format(8, Serial::Even, 2);
-   
+
     myserial.attach(this, &SBUS::_serialEvent, Serial::RxIrq);
     dataIndex = 0;
     failSafe = true;
@@ -14,13 +14,13 @@ SBUS::SBUS(PinName TX, PinName RX) : myserial(TX, RX)
 void SBUS::_serialEvent()
 {
     int val = myserial.getc();
-    
+
     if(dataIndex == 0 && val != SBUS_SYNCBYTE)
         return;
-    
+
     rcvData[dataIndex] = val;
     dataIndex++;
-    
+
     if (dataIndex == 25)
     {
         dataIndex = 0;
@@ -43,7 +43,7 @@ void SBUS::_serialEvent()
             chData[14] = ((rcvData[20] >> 2 | rcvData[21] << 6) & 0x07FF);
             chData[15] = ((rcvData[21] >> 5 | rcvData[22] << 3) & 0x07FF);
             chData[16] = rcvData[23];
-            
+
             if ((rcvData[23] >> 3) & 0x0001)
                 failSafe = true;
             else
@@ -57,7 +57,7 @@ bool SBUS::isFailSafe()
     return failSafe;
 }
 
-int16_t SBUS::getData(uint8_t ch)
+int16_t SBUS::_getData(uint8_t ch)
 {
     return chData[ch];
 }
@@ -67,13 +67,13 @@ int SBUS::getStickVal(int axis)
     switch (axis)
     {
     case 0:
-        return map(constrain(getData(3), 368, 1680), 368, 1680, -255, 255);
+        return _map(_constrain(_getData(3), 368, 1680), 368, 1680, -255, 255);
     case 1:
-        return map(constrain(getData(1), 368, 1680), 368, 1680, 255, -255);
+        return _map(_constrain(_getData(1), 368, 1680), 368, 1680, 255, -255);
     case 2:
-        return map(constrain(getData(0), 368, 1680), 368, 1680, -255, 255);
+        return _map(_constrain(_getData(0), 368, 1680), 368, 1680, -255, 255);
     case 3:
-        return map(constrain(getData(2), 368, 1680), 368, 1680, -255, 255);
+        return _map(_constrain(_getData(2), 368, 1680), 368, 1680, -255, 255);
     default:
         return 0;
     }
@@ -82,15 +82,15 @@ int SBUS::getStickVal(int axis)
 int SBUS::getSwitchVal(int parm)
 {
     if (parm == 0)
-        return map(constrain(getData(4), 144, 1904), 144, 1904, 0, 2);
+        return _map(_constrain(_getData(4), 144, 1904), 144, 1904, 0, 2);
     else if (parm <= 4)
-        return map(constrain(getData(parm + 5), 144, 1904), 144, 1904, 0, 2);
+        return _map(_constrain(_getData(parm + 5), 144, 1904), 144, 1904, 0, 2);
     else
         return 0;
 }
 
 
-float SBUS::constrain(float in, float min, float max)
+float SBUS::_constrain(float in, float min, float max)
 {
     if(in > max)
         return max;
@@ -98,15 +98,15 @@ float SBUS::constrain(float in, float min, float max)
         return min;
     else return in;
 }
-float SBUS::map(float in, float inMin, float inMax, float outMin, float outMax) {
+float SBUS::_map(float in, float inMin, float inMax, float outMin, float outMax) {
   // check it's within the range
-  if (inMin<inMax) { 
-    if (in <= inMin) 
+  if (inMin<inMax) {
+    if (in <= inMin)
       return outMin;
     if (in >= inMax)
       return outMax;
   } else {  // cope with input range being backwards.
-    if (in >= inMin) 
+    if (in >= inMin)
       return outMin;
     if (in <= inMax)
       return outMax;

@@ -3,16 +3,16 @@
 
 #include "mbed.h"
 
-class rotaryEncoder
+class RotaryEncoder
 {
 public:
     float count;
-    rotaryEncoder(PinName a, PinName b, int count_per_rotation = 400);
+    RotaryEncoder(PinName a, PinName b, int count_per_rotation = 400);
     void changeDirection();
     void defineNowCount(float n);
 private:
-    InterruptIn encA;
-    InterruptIn encB;
+    InterruptIn pinA;
+    InterruptIn pinB;
     float count_per_interrupt;
     void _aRaise();
     void _aFall();

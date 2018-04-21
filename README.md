@@ -1,2 +1,10 @@
-# -MokusaMaru
+# MokusaMaru
 モクサマルのプログラム
+
+クラス名はPascalCase
+インスタンスはcamelCase
+関数名はcamelCase　ただし動詞から始める
+変数名はsnake_case
+クラス名とファイル名を一致させる
+
+クラスのpriveteメソッドの頭には_つける
